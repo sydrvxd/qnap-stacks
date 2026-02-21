@@ -1,0 +1,30 @@
+services:
+  dns-cleaner:
+    image: sydrv/netcupdnscleanupservice:latest
+    stdin_open: true  # Equivalent to -i
+    tty: true         # Equivalent to -t
+    restart: unless-stopped
+    environment:
+      NETCUP_CUSTOMER_NUMBER: "${NETCUP_CUSTOMER_ID}"
+      NETCUP_API_KEY: "${NETCUP_API_KEY}"
+      NETCUP_API_PASSWORD: "${NETCUP_API_PASSWORD}"
+      NETCUP_DOMAIN_NAME: "${NETCUP_DOMAIN_NAME}"
+      TZ: "${TZ}"
+    env_file:
+      - stack.env
+    
+  dns-updater:
+    image: sydrv/netcupdnsupdater:latest
+    stdin_open: true  # Equivalent to -i
+    tty: true         # Equivalent to -t
+    restart: unless-stopped
+    environment:
+      NETCUP_CUSTOMER_ID: "${NETCUP_CUSTOMER_ID}"
+      NETCUP_API_KEY: "${NETCUP_API_KEY}"
+      NETCUP_API_PASSWORD: "${NETCUP_API_PASSWORD}"
+      NETCUP_DOMAIN_NAME: "${NETCUP_DOMAIN_NAME}"
+      ZONE_HOSTS: "*,@"
+      TZ: "${TZ}"
+      INTERVAL_SECONDS: "60" 
+    env_file:
+      - stack.env

@@ -1,0 +1,67 @@
+
+services:
+  jellyfin:
+    image: linuxserver/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+
+    entrypoint: ["/init"]
+
+    environment:
+      TZ: "Europe/Berlin"
+      PUID: "1000"
+      # Your inspect shows PGID=0 (root group). Keeping it as-is.
+      PGID: "0"
+
+      # NVIDIA-related envs as found in inspect (kept verbatim)
+      NVIDIA_DRIVER_CAPABILITIES: "all"
+      NVIDIA_VISIBLE_DEVICES: "GPU-a33b1e86-ece5-b26e-de78-8eeef902012b"
+      # These two strings appeared in Env but are not real env vars; they were likely injected by QNAP UI.
+      # If you want to keep them exactly, uncomment:
+      # gpus all: ""
+      # runtime: "nvidia"
+
+    ports:
+      - "8096:8096"
+      - "8920:8920"
+
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-audio:/data/audio
+      - jellyfin-movies:/data/movies
+      - jellyfin-tvseries:/data/tvshows
+      - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/movies:/data/movies-ext"
+      - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/tv:/data/tvshows-ext"
+      - jellyfin-NVIDIA_GPU_DRV:/opt/NVIDIA_GPU_DRV
+      - jellyfin-cuda-bin:/usr/local/cuda/bin
+
+    networks:
+      qnet-static-eth0-79e6cc:
+        ipv4_address: 192.168.1.38
+
+    # If you run this with Docker Compose v2 and want explicit GPU reservation (non-Swarm),
+    # you can add this. Not present in inspect, but often desired.
+    deploy:
+       resources:
+         reservations:
+           devices:
+            - capabilities: ["gpu"]
+
+volumes:
+  jellyfin-config:
+    external: true
+  jellyfin-audio:
+    external: true
+  jellyfin-movies:
+    external: true
+  jellyfin-tvseries:
+    external: true
+  jellyfin-NVIDIA_GPU_DRV:
+    external: true
+  jellyfin-cuda-bin:
+    external: true
+
+networks:
+  qnet-static-eth0-79e6cc:
+    external: true
+

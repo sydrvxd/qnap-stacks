@@ -1,0 +1,306 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    restart: unless-stopped
+    container_name: gluetun
+    # line above must be uncommented to allow external containers to connect.
+    # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/connect-a-container-to-gluetun.md#external-container-to-gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
+      - 9696:9696   # Prowlarr
+      - 8989:8989   # Sonarr
+      - 7878:7878   # Radarr
+      - 8686:8686   # Lidarr
+      - 8787:8787   # Readarr
+      - 8083:8080   # SABnzbd
+      # - 6969:6969   # Whisparr
+      - 5005:5005   # UmlautAdaptarr (can be removed if you use the recommended prowlarr+proxy configuration) 
+      # - 5006:5006 # UmlautAdaptarr (can be removed if you use the alternative, non-proxy configuration)
+      - 9000:9000   # whisper-asr
+      - 6767:6767   # Bazarr
+      - 8889:8888   # unmanic
+      - 5007:5007   # MediathekArr Wizard/Web-UI
+      - 5055:5055   # Jellyseer
+    volumes:
+      - gluetun:/gluetun
+    environment:
+      # See https://github.com/qdm12/gluetun-wiki/tree/main/setup#setup
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      # OpenVPN:
+      # - OPENVPN_USER=
+      # - OPENVPN_PASSWORD=
+      # Wireguard:
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - SERVER_CITIES=Amsterdam, Gothenburg, Malmö, Oslo
+      # Timezone for accurate log times
+      - TZ=Europe/Berlin
+      # Server list updater
+      # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
+      - UPDATER_PERIOD=24h
+      - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24
+
+    dns:
+      - 1.1.1.1
+      - 9.9.9.9
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - prowlarr-config:/config
+    restart: unless-stopped
+
+  # Neu: MediathekArr
+  mediathekarr:
+    image: pcjones/mediathekarr:beta
+    container_name: mediathekarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+      - DOWNLOAD_COMPLETE_PATH=/downloads
+      - DOWNLOAD_INCOMPLETE_PATH=/app/incomplete
+      - CATEGORIES=tv,movies
+    volumes:
+      - sabnzbd-downloads:/downloads
+      - sabnzbd-incomplete-downloads:/app/incomplete
+      - mediathekarr-config:/config
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - sonarr-config:/config
+      - "/share/ZFS3_DATA/Multimedia/Serien u.ä:/tv"
+      - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/tv:/tv-ext"
+      - sabnzbd-downloads:/downloads
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - radarr-config:/config
+      - "/share/ZFS3_DATA/Multimedia/Filme HD 2:/movies"
+      - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/movies:/movies-ext"
+      - sabnzbd-downloads:/downloads
+    restart: unless-stopped
+
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - sabnzbd-config:/config
+      - sabnzbd-downloads:/downloads
+      - sabnzbd-incomplete-downloads:/incomplete-downloads
+    restart: unless-stopped
+
+  umlautadaptarr:
+    image: pcjones/umlautadaptarr:latest
+    container_name: UmlautAdaptarr
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+      - PUID=1000
+      - PGID=1000
+      - SONARR__ENABLED=true
+      - SONARR__HOST=http://localhost:8989
+      - SONARR__APIKEY=${SONARR_API_KEY}
+      - RADARR__ENABLED=true
+      - RADARR__HOST=http://localhost:7878
+      - RADARR__APIKEY=${RADARR_API_KEY}
+      - READARR__ENABLED=true
+      - READARR__HOST=http://localhost:8787
+      - READARR__APIKEY=${READARR_API_KEY}
+      - LIDARR__ENABLED=true
+      - LIDARR__HOST=http://localhost:8686
+      - LIDARR__APIKEY=${LIDARR_API_KEY}
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - lidarr-config:/config
+      - /share/ZFS3_DATA/Multimedia/Musik:/music
+      - sabnzbd-downloads:/downloads
+    restart: unless-stopped
+
+  readarr:
+    image: lscr.io/linuxserver/readarr:0.4.18-develop
+    container_name: readarr
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin
+    volumes:
+      - readarr-config:/config
+      - /share/ZFS3_DATA/Multimedia/AudioBooks:/audiobooks
+      - /share/ZFS3_DATA/Multimedia/Books:/books
+      - sabnzbd-downloads:/downloads
+    restart: unless-stopped
+
+  whisper-asr:
+    image: onerahmet/openai-whisper-asr-webservice:v1.7.1-gpu
+    stdin_open: true                                           # docker run -i
+    tty: true                                                  # docker run -t
+    environment:
+      - ASR_MODEL=medium                                       # smaller model
+      - ASR_ENGINE=faster_whisper
+      - ASR_DEVICE=cuda
+      - ASR_QUANTIZATION=float16
+      - MODEL_IDLE_TIMEOUT=600
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=GPU-a33b1e86-ece5-b26e-de78-8eeef902012b
+      # - CT2_GPU_MEMORY_FRACTION=0.85                           # reserve 15 % for driver & other apps
+      - TZ=Europe/Berlin
+    network_mode: "service:gluetun"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    volumes:
+      - cache-whisper:/root/.cache
+
+  # ------------  Bazarr  ------------
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    stdin_open: true                                            # docker run -i
+    tty: true                                                   # docker run -t
+    environment:
+      - PUID=1000                                               # 🔧 host user id  (`id -u`)
+      - PGID=1000                                               # 🔧 host group id (`id -g`)
+      - TZ=Europe/Berlin
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=GPU-a33b1e86-ece5-b26e-de78-8eeef902012b
+    volumes:
+      - bazarr-config:/config
+      - "/share/ZFS3_DATA/Multimedia/Filme HD 2:/movies"
+      - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/movies:/movies-ext"
+      - "/share/ZFS3_DATA/Multimedia/Serien u.ä:/tv"
+      - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/tv:/tv-ext"
+    network_mode: "service:gluetun"
+    depends_on:
+      - whisper-asr                                             # wait for Whisper to start
+    restart: unless-stopped
+
+  # ------------  unmanic  ------------
+  unmanic:
+    image: josh5/unmanic:latest
+    container_name: unmanic
+    stdin_open: true                                           # docker run -i
+    tty: true                                                  # docker run -t
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin            
+    volumes:
+      - unmanic-config:/config
+      - /share/ZFS3_DATA/Multimedia:/library
+      - unmanic-cache:/tmp/unmanic
+
+    network_mode: "service:gluetun"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+    # ------------  Jellyseer  ------------
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    stdin_open: true                                           # docker run -i
+    tty: true                                                  # docker run -t
+  
+    working_dir: /app
+    entrypoint: ["/sbin/tini", "--"]
+    command: ["pnpm", "start"]
+  
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Berlin 
+      - LOG_LEVEL=debug
+
+    volumes:
+      - jellyseerr-app-config:/app/config
+      
+    network_mode: "service:gluetun"
+    restart: unless-stopped
+
+volumes:
+  gluetun:
+    external: true
+  prowlarr-config:
+    external: true
+  mediathekarr-config:
+    external: true
+  sonarr-config:
+    external: true
+  radarr-config:
+    external: true
+  sabnzbd-config:
+    external: true
+  sabnzbd-downloads:
+    external: true
+  sabnzbd-incomplete-downloads:
+    external: true
+  lidarr-config:
+    external: true
+  readarr-config:
+    external: true
+  cache-whisper:
+    external: true
+  bazarr-config:
+    external: true
+  unmanic-config:
+    external: true
+  unmanic-cache:
+    external: true
+  jellyseerr-app-config:
+    external: true

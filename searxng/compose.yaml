@@ -1,0 +1,58 @@
+services:
+  searxng:
+    # Offizielle Images gibt es auf DockerHub und als Mirror auf GHCR.
+    # GHCR hilft ggf. gegen DockerHub Pull-Rate-Limits.
+    image: ghcr.io/searxng/searxng:latest
+    # alternativ:
+    # image: docker.io/searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+
+    depends_on:
+      - valkey
+
+    ports:
+      - "8801:8080"   # http://<host-ip>:8888
+
+    environment:
+      # sorgt dafür, dass gemountete Volumes dem searxng-User gehören (Default: true)
+      - FORCE_OWNERSHIP=true
+      # optional: wenn du im Container explizit nur IPv4 willst
+      # - BIND_ADDRESS=0.0.0.0:8080
+
+    volumes:
+      - searxng:/etc/searxng:rw
+      - searxng-data:/var/cache/searxng:rw
+
+    networks:
+      - searxng_net
+
+  valkey:
+    image: docker.io/valkey/valkey:8-alpine
+    container_name: searxng-valkey
+    restart: unless-stopped
+
+    command:
+      - valkey-server
+      - --save
+      - "60"
+      - "1"
+      - --loglevel
+      - warning
+
+    volumes:
+      - valkey-data:/data
+
+    networks:
+      - searxng_net
+
+networks:
+  searxng_net:
+
+volumes:
+  valkey-data:
+    external: true
+  searxng:
+    external: true
+  searxng-data:
+    external: true

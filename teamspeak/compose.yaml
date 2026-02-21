@@ -1,0 +1,40 @@
+
+services:
+  teamspeak:
+    image: teamspeak:latest
+    container_name: teamspeak
+    hostname: teamspeak
+    restart: unless-stopped
+
+    tty: true
+    stdin_open: true
+
+    working_dir: /var/ts3server
+    entrypoint: ["entrypoint.sh"]
+    command: ["ts3server"]
+
+    environment:
+      TS3SERVER_LICENSE: "accept"
+      TZ: "Europe/Berlin"
+
+    # TeamSpeak uses UDP 9987 (voice) and TCP 10011 (serverquery), TCP 30033 (filetransfer)
+    ports:
+      - "9987:9987/udp"
+      - "10011:10011/tcp"
+      - "30033:30033/tcp"
+
+    volumes:
+      - var-ts3server:/var/ts3server
+
+    networks:
+      qnet-static-eth0-79e6cc:
+        ipv4_address: 192.168.1.130
+
+volumes:
+  var-ts3server:
+    external: true
+
+networks:
+  qnet-static-eth0-79e6cc:
+    external: true
+

@@ -1,0 +1,19 @@
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    restart: unless-stopped
+    ports:
+      - 13378:80
+    volumes:
+      - /share/ZFS3_DATA/Multimedia/AudioBooks:/audiobooks
+      - /share/ZFS3_DATA/Multimedia/Podcasts:/podcasts
+      - audiobookshelf-config:/config
+      - audiobookshelf-metadata:/metadata
+    environment:
+      - TZ=Europe/Berlin
+
+volumes:
+  audiobookshelf-config:
+    external: true
+  audiobookshelf-metadata:
+    external: true

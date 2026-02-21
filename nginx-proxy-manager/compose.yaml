@@ -1,0 +1,50 @@
+services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+
+    entrypoint: ["/init"]
+    working_dir: /app
+
+    environment:
+      TZ: "Europe/Berlin"
+      PUID: "1000"
+      PGID: "1000"
+      NODE_ENV: "production"
+      NODE_OPTIONS: "--openssl-legacy-provider"
+      SUPPRESS_NO_CONFIG_WARNING: "1"
+      S6_CMD_WAIT_FOR_SERVICES_MAXTIME: "0"
+      S6_KILL_FINISH_MAXTIME: "10000"
+      S6_VERBOSITY: "1"
+      S6_BEHAVIOUR_IF_STAGE2_FAILS: "1"
+      S6_FIX_ATTRS_HIDDEN: "1"
+      SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
+      CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
+
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+
+    volumes:
+      - nginx-proxy-manager-data:/data
+      - nginx-proxy-manager-etc-letsencrypt:/etc/letsencrypt
+      - nginx-proxy-manager-tmp-letsencrypt-log:/tmp/letsencrypt-log
+
+    networks:
+      qnet-static-eth0-79e6cc:
+        ipv4_address: 192.168.1.5
+
+volumes:
+  nginx-proxy-manager-data:
+    external: true
+  nginx-proxy-manager-etc-letsencrypt:
+    external: true
+  nginx-proxy-manager-tmp-letsencrypt-log:
+    external: true
+
+networks:
+  qnet-static-eth0-79e6cc:
+    external: true
+

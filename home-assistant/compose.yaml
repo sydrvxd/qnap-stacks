@@ -1,0 +1,32 @@
+services:
+    home-assistant:
+        container_name: home-assistant
+        restart: unless-stopped
+        privileged: true
+        image: homeassistant/home-assistant:stable
+        stdin_open: true # docker run -i
+        tty: true        # docker run -t
+        volumes:
+            - home-assistant-config:/config
+            - /etc/localtime:/etc/localtime:ro
+            - /run/dbus:/run/dbus:ro
+        networks:
+            qnet-static-eth0-79e6cc:
+                ipv4_address: 192.168.1.9
+        ports:
+            - 8123:8123
+        environment:
+            - TZ=Europe/Berlin
+            - PUID=1000
+            - PGID=1000
+        group_add:
+            - dialout
+
+volumes:
+  home-assistant-config:
+    external: true
+
+networks:
+  qnet-static-eth0-79e6cc:
+    external: true
+    name: qnet-static-eth0-79e6cc

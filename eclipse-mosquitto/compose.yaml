@@ -1,0 +1,38 @@
+services:
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: eclipse-mosquitto
+    restart: unless-stopped
+    hostname: mqtt
+    tty: true
+    stdin_open: true
+
+    environment:
+      TZ: "Europe/Berlin"
+
+    command: ["/usr/sbin/mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+
+    ports:
+      - "1883:1883"
+
+    volumes:
+      - mosquitto-config:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+
+    networks:
+      qnet-static-eth0-79e6cc:
+        ipv4_address: 192.168.1.165
+
+volumes:
+  mosquitto-config:
+    external: true
+  mosquitto-data:
+    external: true
+  mosquitto-log:
+    external: true
+
+networks:
+  qnet-static-eth0-79e6cc:
+    external: true
+

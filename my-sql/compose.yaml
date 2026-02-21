@@ -1,0 +1,69 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
+    restart: unless-stopped
+
+    # Port nur veröffentlichen, wenn du von außen (Host/LAN) zugreifen willst.
+    # Für reine Container-Nutzung kannst du "ports" weglassen.
+    ports:
+      - "3306:3306"
+
+    environment:
+      # WICHTIG: Root-Passwort NICHT hardcoden -> aus .env
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+      # Optional: initiale DB + User
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-appdb}
+      MYSQL_USER: ${MYSQL_USER:-appuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change_me}
+
+      TZ: Europe/Berlin
+
+    command:
+      # sinnvolle Defaults (nach Bedarf anpassen)
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+01:00
+      - --sql-mode=STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+      # - --innodb-buffer-pool-size=1G   # optional: manuell setzen
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # optional: init-skripte beim ersten Start
+      # - ./init:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+    networks:
+      qnet-static-eth0-79e6cc:
+        ipv4_address: 192.168.1.19
+
+  # Optional: Adminer Web UI
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: Europe/Berlin
+    networks:
+      qnet-static-eth0-79e6cc:
+        ipv4_address: 192.168.1.18
+
+volumes:
+  mysql_data:
+
+networks:
+  qnet-static-eth0-79e6cc:
+    external: true
+
