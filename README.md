@@ -14,7 +14,6 @@ Docker Compose Stacks für QNAP NAS (192.168.1.100).
 | immich-app | Photo Management (GPU) | ✅ |
 | jellyfin | Media Server (GPU) | - |
 | my-sql | MySQL 8.4 + Adminer | ✅ |
-| netcup | DNS Updater + Cleaner | ✅ |
 | nginx-proxy-manager | Reverse Proxy | - |
 | searxng-mcp-server | Privacy Search Engine | - |
 | teamspeak | Voice Server | - |
