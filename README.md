@@ -8,7 +8,6 @@ Docker Compose Stacks für QNAP NAS (192.168.1.100).
 |-------|-------------|---------|
 | audiobookshelf | Audiobook & Podcast Server | - |
 | chromium-browser | Webtop mit GPU (NVIDIA) | ✅ |
-| docker-updater | Auto-Update Service | ✅ |
 | eclipse-mosquitto | MQTT Broker | - |
 | gluetun | VPN (Mullvad) + *arr Stack | ✅ |
 | home-assistant | Smart Home | - |
