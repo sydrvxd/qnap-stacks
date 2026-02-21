@@ -17,7 +17,7 @@ Docker Compose Stacks für QNAP NAS (192.168.1.100).
 | my-sql | MySQL 8.4 + Adminer | ✅ |
 | netcup | DNS Updater + Cleaner | ✅ |
 | nginx-proxy-manager | Reverse Proxy | - |
-| searxng | Privacy Search Engine | - |
+| searxng-mcp-server | Privacy Search Engine | - |
 | teamspeak | Voice Server | - |
 | vaultwarden | Password Manager | - |
 | zigbee2mqtt | Zigbee Bridge | - |
