@@ -10,8 +10,6 @@ services:
       NETCUP_API_PASSWORD: "${NETCUP_API_PASSWORD}"
       NETCUP_DOMAIN_NAME: "${NETCUP_DOMAIN_NAME}"
       TZ: "${TZ}"
-    env_file:
-      - stack.env
     
   dns-updater:
     image: sydrv/netcupdnsupdater:latest
@@ -26,5 +24,3 @@ services:
       ZONE_HOSTS: "*,@"
       TZ: "${TZ}"
       INTERVAL_SECONDS: "60" 
-    env_file:
-      - stack.env
