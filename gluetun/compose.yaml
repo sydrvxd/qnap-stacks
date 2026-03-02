@@ -178,8 +178,6 @@ services:
 
   whisper-asr:
     image: onerahmet/openai-whisper-asr-webservice:v1.7.1-gpu
-    stdin_open: true                                           # docker run -i
-    tty: true                                                  # docker run -t
     environment:
       - ASR_MODEL=medium                                       # smaller model
       - ASR_ENGINE=faster_whisper
@@ -206,8 +204,6 @@ services:
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
-    stdin_open: true                                            # docker run -i
-    tty: true                                                   # docker run -t
     environment:
       - PUID=1000                                               # 🔧 host user id  (`id -u`)
       - PGID=1000                                               # 🔧 host group id (`id -g`)
@@ -229,8 +225,6 @@ services:
   unmanic:
     image: josh5/unmanic:latest
     container_name: unmanic
-    stdin_open: true                                           # docker run -i
-    tty: true                                                  # docker run -t
     environment:
       - PUID=1000
       - PGID=1000
@@ -251,15 +245,11 @@ services:
     restart: unless-stopped
 
     # ------------  Jellyseer  ------------
-  jellyseerr:
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
-    stdin_open: true                                           # docker run -i
-    tty: true                                                  # docker run -t
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
   
-    working_dir: /app
-    entrypoint: ["/sbin/tini", "--"]
-    command: ["pnpm", "start"]
   
     environment:
       - PUID=1000
