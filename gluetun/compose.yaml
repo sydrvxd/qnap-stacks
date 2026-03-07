@@ -46,6 +46,11 @@ services:
       # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
       - UPDATER_PERIOD=24h
       - FIREWALL_OUTBOUND_SUBNETS=192.168.1.0/24
+      - FIREWALL_INPUT_PORTS=5055,8989,7878,6767,8686,8787,9696,8080,9000,5005,5007,8888
+
+    networks:
+      - default
+      - proxy-net
 
     dns:
       - 1.1.1.1
@@ -288,4 +293,8 @@ volumes:
   unmanic-cache:
     external: true
   jellyseerr-app-config:
+    external: true
+
+networks:
+  proxy-net:
     external: true

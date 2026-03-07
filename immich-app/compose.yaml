@@ -40,6 +40,9 @@ services:
       IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning:3003
     ports:
       - '2283:2283'
+    networks:
+      - default
+      - proxy-net
     depends_on:
       - redis
       - database
@@ -106,3 +109,7 @@ volumes:
   model-cache:
   immich-redis:
   immich-server-data:
+
+networks:
+  proxy-net:
+    external: true

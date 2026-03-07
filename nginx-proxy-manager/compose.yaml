@@ -23,9 +23,9 @@ services:
       CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
 
     ports:
-      - "80:80"
-      - "81:81"
-      - "443:443"
+      - "192.168.1.5:80:80"
+      - "192.168.1.5:81:81"
+      - "192.168.1.5:443:443"
 
     volumes:
       - nginx-proxy-manager-data:/data
@@ -35,6 +35,7 @@ services:
     networks:
       qnet-static-eth0-79e6cc:
         ipv4_address: 192.168.1.5
+      proxy-net:
 
 volumes:
   nginx-proxy-manager-data:
@@ -46,5 +47,7 @@ volumes:
 
 networks:
   qnet-static-eth0-79e6cc:
+    external: true
+  proxy-net:
     external: true
 
