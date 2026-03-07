@@ -22,10 +22,8 @@ services:
       SSL_CERT_FILE: "/etc/ssl/certs/ca-certificates.crt"
       CURL_CA_BUNDLE: "/etc/ssl/certs/ca-certificates.crt"
 
-    ports:
-      - "192.168.1.5:80:80"
-      - "192.168.1.5:81:81"
-      - "192.168.1.5:443:443"
+    # Ports are served via qnet macvlan IP (192.168.1.5), not host binding
+    # Port publishing is handled by the qnet driver directly
 
     volumes:
       - nginx-proxy-manager-data:/data
