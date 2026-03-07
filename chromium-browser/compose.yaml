@@ -70,8 +70,16 @@ services:
       - "3000:3000"   # 👈 add the web UI port (LSIO webtop default)
       - "3001:3001"   # keep if you use the secondary service
 
+    networks:
+      - default
+      - proxy-net
+
     restart: unless-stopped
 
 volumes:
   chromium-config:
+    external: true
+
+networks:
+  proxy-net:
     external: true

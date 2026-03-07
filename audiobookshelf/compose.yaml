@@ -9,6 +9,9 @@ services:
       - /share/ZFS3_DATA/Multimedia/Podcasts:/podcasts
       - audiobookshelf-config:/config
       - audiobookshelf-metadata:/metadata
+    networks:
+      - default
+      - proxy-net
     environment:
       - TZ=Europe/Berlin
 
@@ -16,4 +19,8 @@ volumes:
   audiobookshelf-config:
     external: true
   audiobookshelf-metadata:
+    external: true
+
+networks:
+  proxy-net:
     external: true
