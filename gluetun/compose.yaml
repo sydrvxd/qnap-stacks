@@ -18,7 +18,6 @@ services:
       - 7878:7878   # Radarr
       - 8686:8686   # Lidarr
       - 8787:8787   # Readarr
-      - 8083:8080   # SABnzbd
       # - 6969:6969   # Whisparr
       - 5005:5005   # UmlautAdaptarr (can be removed if you use the recommended prowlarr+proxy configuration) 
       # - 5006:5006 # UmlautAdaptarr (can be removed if you use the alternative, non-proxy configuration)
@@ -119,7 +118,8 @@ services:
   sabnzbd:
     image: lscr.io/linuxserver/sabnzbd:latest
     container_name: sabnzbd
-    network_mode: "service:gluetun"
+    ports:
+      - 8083:8080
     environment:
       - PUID=1000
       - PGID=1000
@@ -128,6 +128,9 @@ services:
       - sabnzbd-config:/config
       - sabnzbd-downloads:/downloads
       - sabnzbd-incomplete-downloads:/incomplete-downloads
+    networks:
+      - default
+      - proxy-net
     restart: unless-stopped
 
   umlautadaptarr:
@@ -298,3 +301,4 @@ volumes:
 networks:
   proxy-net:
     external: true
+
