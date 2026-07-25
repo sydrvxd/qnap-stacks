@@ -65,6 +65,8 @@ services:
       - TZ=Europe/Berlin
     volumes:
       - prowlarr-config:/config
+      - /share/Container/prowlarr-ca/openclaw-caddy-root.crt:/usr/local/share/ca-certificates/openclaw-caddy-root.crt:ro
+      - /share/Container/prowlarr-ca/init:/custom-cont-init.d:ro
     restart: unless-stopped
 
   # Neu: MediathekArr
