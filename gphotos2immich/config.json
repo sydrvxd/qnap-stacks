@@ -1,0 +1,8 @@
+{
+  "debug": false,
+  "workers": 4,
+  "albumWorkers": 2,
+  "strictMetadata": false,
+  "skipVideos": false,
+  "googlePhotos": []
+}

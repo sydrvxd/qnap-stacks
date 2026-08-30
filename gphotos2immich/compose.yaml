@@ -1,0 +1,37 @@
+name: gphotos2immich
+
+# Synct Google-Photos-Shared-Alben (per Share-Link) nach Immich.
+#
+# Warum ein Scraper und keine API: Google hat die Scopes photoslibrary.readonly,
+# .sharing und photoslibrary zum 31.03.2025 entfernt. Shared-Album-Funktionen
+# (share/unshare/get/join/leave/list) liefern seitdem 403 PERMISSION_DENIED.
+# Google Takeout hilft ebenfalls nicht: es exportiert keine Alben, die mit einem
+# geteilt wurden. Der Share-Link ist der einzig verbliebene Zugang.
+#
+# Konfiguration: config.json (Album-Liste, ohne Secrets, liegt im Git-Repo).
+# Secrets: IMMICH_API_KEY / IMMICH_API_URL kommen aus der Komodo-Environment,
+# nicht aus dem Repo. pkg/config/config.go faellt auf diese Env-Vars zurueck,
+# wenn apiKey/apiURL in der config.json fehlen.
+
+services:
+  gphotos2immich:
+    container_name: gphotos2immich
+    image: ghcr.io/warreth/gphotos2immich:latest
+    restart: unless-stopped
+    # host-Netz gegen die bekannten QNAP-Container-DNS-Aussetzer (gleicher Fix
+    # wie beim Vaultwarden-Backup). Erreicht damit auch Immich auf .100:2283.
+    network_mode: host
+    environment:
+      - TZ=Europe/Berlin
+      # Web-UI aus: sie ist laut Upstream NICHT passwortgeschuetzt, und Port 8080
+      # ist auf der QNAP ohnehin von der QTS-Admin-Oberflaeche belegt.
+      # Alben werden ueber die config.json im Repo gepflegt.
+      - DISABLE_WEBUI=true
+      - IMMICH_API_URL=${IMMICH_API_URL}
+      - IMMICH_API_KEY=${IMMICH_API_KEY}
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - gphotos2immich-data:/app/data
+
+volumes:
+  gphotos2immich-data:

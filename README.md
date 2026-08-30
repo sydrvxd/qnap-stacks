@@ -10,6 +10,7 @@ Docker Compose Stacks für QNAP NAS (192.168.1.100).
 | chromium-browser | Webtop mit GPU (NVIDIA) | ✅ |
 | eclipse-mosquitto | MQTT Broker | - |
 | gluetun | VPN (Mullvad) + *arr Stack | ✅ |
+| gphotos2immich | Google-Photos-Shared-Alben → Immich | ✅ |
 | home-assistant | Smart Home | - |
 | immich-app | Photo Management (GPU) | ✅ |
 | jellyfin | Media Server (GPU) | - |
