@@ -1,0 +1,15 @@
+{
+  "_hinweis": "Vorlage. Die echte Konfiguration liegt base64-kodiert in der Komodo-Secret-Variable GPHOTOS_CONFIG_B64, NICHT in diesem oeffentlichen Repo. apiKey/apiURL hier weglassen: das Tool faellt auf IMMICH_API_KEY/IMMICH_API_URL aus der Environment zurueck.",
+  "debug": false,
+  "workers": 4,
+  "albumWorkers": 2,
+  "strictMetadata": false,
+  "skipVideos": false,
+  "googlePhotos": [
+    {
+      "url": "https://photos.google.com/share/<mediaKey>?key=<authKey>",
+      "albumName": "optional, sonst wird der Google-Albumtitel uebernommen",
+      "syncInterval": "1h"
+    }
+  ]
+}

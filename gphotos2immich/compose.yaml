@@ -8,10 +8,14 @@ name: gphotos2immich
 # Google Takeout hilft ebenfalls nicht: es exportiert keine Alben, die mit einem
 # geteilt wurden. Der Share-Link ist der einzig verbliebene Zugang.
 #
-# Konfiguration: config.json (Album-Liste, ohne Secrets, liegt im Git-Repo).
-# Secrets: IMMICH_API_KEY / IMMICH_API_URL kommen aus der Komodo-Environment,
-# nicht aus dem Repo. pkg/config/config.go faellt auf diese Env-Vars zurueck,
-# wenn apiKey/apiURL in der config.json fehlen.
+# ACHTUNG: Dieses Repo ist OEFFENTLICH. Google-Photos-Share-Links sind faktisch
+# Bearer-Tokens (wer den Link hat, sieht das Album), deshalb liegt die Album-Liste
+# NICHT hier, sondern in der Komodo-Secret-Variable GPHOTOS_CONFIG_B64. Der
+# Container schreibt sich daraus beim Start seine /app/config.json.
+# Aufbau der JSON siehe config.example.json.
+#
+# Base64 statt Klartext-JSON, weil Komodo die Environment als .env-Datei ablegt
+# und mehrzeiliges JSON mit Quotes dort nicht zuverlaessig durchkommt.
 
 services:
   gphotos2immich:
@@ -21,16 +25,22 @@ services:
     # host-Netz gegen die bekannten QNAP-Container-DNS-Aussetzer (gleicher Fix
     # wie beim Vaultwarden-Backup). Erreicht damit auch Immich auf .100:2283.
     network_mode: host
+    # $$ escaped die Compose-Interpolation, damit die Shell im Container die
+    # Variable aufloest. Ohne gueltige Variable bricht der Start bewusst ab,
+    # statt mit leerer Konfiguration weiterzulaufen.
+    entrypoint:
+      - /bin/sh
+      - -c
+      - 'set -e; echo "$$GPHOTOS_CONFIG_B64" | base64 -d > /app/config.json; exec ./gphotos2immich'
     environment:
       - TZ=Europe/Berlin
       # Web-UI aus: sie ist laut Upstream NICHT passwortgeschuetzt, und Port 8080
       # ist auf der QNAP ohnehin von der QTS-Admin-Oberflaeche belegt.
-      # Alben werden ueber die config.json im Repo gepflegt.
       - DISABLE_WEBUI=true
       - IMMICH_API_URL=${IMMICH_API_URL}
       - IMMICH_API_KEY=${IMMICH_API_KEY}
+      - GPHOTOS_CONFIG_B64=${GPHOTOS_CONFIG_B64}
     volumes:
-      - ./config.json:/app/config.json:ro
       - gphotos2immich-data:/app/data
 
 volumes:
