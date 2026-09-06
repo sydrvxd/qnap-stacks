@@ -21,7 +21,6 @@ services:
       # - 6969:6969   # Whisparr
       - 5005:5005   # UmlautAdaptarr (can be removed if you use the recommended prowlarr+proxy configuration) 
       # - 5006:5006 # UmlautAdaptarr (can be removed if you use the alternative, non-proxy configuration)
-      - 9000:9000   # whisper-asr
       - 6767:6767   # Bazarr
       - 8889:8888   # unmanic
       - 5007:5007   # MediathekArr Wizard/Web-UI
@@ -186,30 +185,6 @@ services:
       - sabnzbd-downloads:/downloads
     restart: unless-stopped
 
-  whisper-asr:
-    image: onerahmet/openai-whisper-asr-webservice:v1.7.1-gpu
-    environment:
-      - ASR_MODEL=medium                                       # smaller model
-      - ASR_ENGINE=faster_whisper
-      - ASR_DEVICE=cuda
-      - ASR_QUANTIZATION=float16
-      - MODEL_IDLE_TIMEOUT=600
-      - NVIDIA_DRIVER_CAPABILITIES=all
-      - NVIDIA_VISIBLE_DEVICES=GPU-a33b1e86-ece5-b26e-de78-8eeef902012b
-      # - CT2_GPU_MEMORY_FRACTION=0.85                           # reserve 15 % for driver & other apps
-      - TZ=Europe/Berlin
-    network_mode: "service:gluetun"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    restart: unless-stopped
-    volumes:
-      - cache-whisper:/root/.cache
-
   # ------------  Bazarr  ------------
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
@@ -227,8 +202,6 @@ services:
       - "/share/ZFS3_DATA/Multimedia/Serien u.ä:/tv"
       - "/share/external/.nd/1000/09031e4d7-fe6c-4f44-af2b-865d0f068386/tv:/tv-ext"
     network_mode: "service:gluetun"
-    depends_on:
-      - whisper-asr                                             # wait for Whisper to start
     restart: unless-stopped
 
   # ------------  unmanic  ------------
@@ -288,8 +261,6 @@ volumes:
   lidarr-config:
     external: true
   readarr-config:
-    external: true
-  cache-whisper:
     external: true
   bazarr-config:
     external: true
