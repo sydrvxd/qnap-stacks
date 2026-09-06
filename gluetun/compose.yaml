@@ -22,7 +22,6 @@ services:
       - 5005:5005   # UmlautAdaptarr (can be removed if you use the recommended prowlarr+proxy configuration) 
       # - 5006:5006 # UmlautAdaptarr (can be removed if you use the alternative, non-proxy configuration)
       - 6767:6767   # Bazarr
-      - 8889:8888   # unmanic
       - 5007:5007   # MediathekArr Wizard/Web-UI
       - 5055:5055   # Jellyseer
     volumes:
@@ -204,29 +203,6 @@ services:
     network_mode: "service:gluetun"
     restart: unless-stopped
 
-  # ------------  unmanic  ------------
-  unmanic:
-    image: josh5/unmanic:latest
-    container_name: unmanic
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Berlin            
-    volumes:
-      - unmanic-config:/config
-      - /share/ZFS3_DATA/Multimedia:/library
-      - unmanic-cache:/tmp/unmanic
-
-    network_mode: "service:gluetun"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    restart: unless-stopped
-
     # ------------  Jellyseer  ------------
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
@@ -263,10 +239,6 @@ volumes:
   readarr-config:
     external: true
   bazarr-config:
-    external: true
-  unmanic-config:
-    external: true
-  unmanic-cache:
     external: true
   jellyseerr-app-config:
     external: true
